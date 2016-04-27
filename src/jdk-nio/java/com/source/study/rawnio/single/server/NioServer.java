@@ -118,8 +118,8 @@ public class NioServer {
 		channel.configureBlocking(false);
 		SelectionKey chKey = channel.register(selector, SelectionKey.OP_READ);
 		chKey.attach(byteBuf);// attach一块buf，避免重复申请
-		channel.finishConnect();
-		System.out.println("receive on channel:" + channel);
+//		channel.finishConnect();//服务端调用这个方法是没意义的
+		logger.info("receive an channel:" + channel);
 	}
 
 	public static void main(String[] args) throws InterruptedException {

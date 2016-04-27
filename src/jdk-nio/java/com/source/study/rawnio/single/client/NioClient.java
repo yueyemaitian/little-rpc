@@ -67,11 +67,16 @@ public class NioClient {
 			return;
 		}
 		logger.info("op_connect fired");
+		SocketChannel channel = (SocketChannel) key.channel();
+		if(!channel.finishConnect()){
+			channel.close();
+			throw new IOException("failed to finish connect");
+		}
 		// 这里必须把op_connect时间反注册了，否则会一直出发op_connect事件
 		key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
 		key.attach(ByteBuffer.allocate(10 * 1024));
 		for (ChannelInHandler<?> handler : inHandlers) {
-			handler.channelActive((SocketChannel) key.channel());
+			handler.channelActive(channel);
 		}
 	}
 
@@ -103,8 +108,8 @@ public class NioClient {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		NioClient nioClient = new NioClient();
-		nioClient.init(11688);
 		nioClient.addHandler(new SimpleChannelInHandler());
+		nioClient.init(11688);
 		Thread.sleep(3000);
 		// 如果这里selector不关闭，直接kill进程，服务端会一直收到op_read事件，但是读不到数据，也不报IOException
 		// nioClient.shutdown();
