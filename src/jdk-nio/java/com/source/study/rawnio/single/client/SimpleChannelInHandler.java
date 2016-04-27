@@ -20,14 +20,18 @@ public class SimpleChannelInHandler implements ChannelInHandler<String> {
 
 	@Override
 	public String read(ByteBuffer byteBuf, SocketChannel channel) throws IOException {
-		String rst = new String(byteBuf.array());
+		//从channel读数据到ByteBuffer以后，一定要flip，然后再调用ByteBuffer#remaining、ByteBuffer#get等方法
+		byte[] dst = new byte[byteBuf.remaining()];
+		byteBuf.get(dst);
+		byteBuf.clear();
+		String rst = new String(dst);
 		logger.info("Receive data from " + channel + ": " + rst);
 		return rst;
 	}
 
 	@Override
 	public void channelActive(SocketChannel channel) throws IOException {
-		logger.info("Channel active: " + channel);
+		logger.info("Channel active, will write data to server: " + channel);
 		channel.write(byteBuf);
 	}
 

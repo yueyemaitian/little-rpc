@@ -44,7 +44,7 @@ public class NioServer {
 
 	public void listen() throws IOException {
 		while (selector.select() > 0) {
-			//客户端断了的时候，为何服务端会触发两次OP_READ事件
+			// 客户端断了的时候，为何服务端会触发两次OP_READ事件
 			processKeys(selector.selectedKeys());
 		}
 	}
@@ -54,10 +54,11 @@ public class NioServer {
 		while (iter.hasNext()) {
 			SelectionKey key = iter.next();
 			iter.remove();
-			logger.info("receive key:" + key.channel() + ", op: " + key.interestOps());
+			// logger.info("receive key:" + key.channel() + ", op: " +
+			// key.interestOps());
 			try {
 				processSelectionKey(key);
-			} catch (IOException e) {//如果抛出IOException 很可能是客户端已经close了或者进程被kill
+			} catch (IOException e) {// 如果抛出IOException 很可能是客户端已经close了或者进程被kill
 				logger.error("Failed to process selection key： " + key, e);
 				closeIfNecessary(key);
 			}
@@ -101,6 +102,10 @@ public class NioServer {
 		ByteBuffer byteBuf = (ByteBuffer) key.attachment();
 		while (sc.read(byteBuf) > 0) {
 		}
+		byteBuf.flip();
+		if(byteBuf.remaining() == 0){
+			return;
+		}
 		handleReadData(byteBuf, sc);
 	}
 
@@ -118,7 +123,7 @@ public class NioServer {
 		channel.configureBlocking(false);
 		SelectionKey chKey = channel.register(selector, SelectionKey.OP_READ);
 		chKey.attach(byteBuf);// attach一块buf，避免重复申请
-//		channel.finishConnect();//服务端调用这个方法是没意义的
+		// channel.finishConnect();//服务端调用这个方法是没意义的
 		logger.info("receive an channel:" + channel);
 	}
 
@@ -129,15 +134,19 @@ public class NioServer {
 
 			nioServer.addHandler(new ChannelInHandler<String>() {
 				private AtomicLong idx = new AtomicLong();
+				private ByteBuffer byteBufCache = ByteBuffer.allocate(1024);
 
 				@Override
 				public String read(ByteBuffer byteBuf, SocketChannel channel) throws IOException {
-					String rst = new String(byteBuf.array());
+					byte[] dst = new byte[byteBuf.remaining()];
+					byteBuf.get(dst);
 					byteBuf.clear();
-					byteBuf.put(new String("received#" + idx.getAndIncrement()).getBytes());
-					byteBuf.flip();
-					channel.write(byteBuf);
-					byteBuf.clear();
+					String rst = new String(dst);
+					logger.info("Receive data from " + channel.getRemoteAddress() + ": " + rst);
+					byteBufCache.clear();
+					byteBufCache.put(("received#" + idx.getAndIncrement()).getBytes());
+					byteBufCache.flip();
+					channel.write(byteBufCache);
 					return rst;
 				}
 

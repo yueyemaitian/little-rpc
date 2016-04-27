@@ -27,7 +27,7 @@ public class NioClient {
 		SocketChannel sc = SocketChannel.open();
 		sc.configureBlocking(false);
 		boolean connected = sc.connect(new InetSocketAddress(port));
-		sc.register(selector, SelectionKey.OP_CONNECT);
+		sc.register(selector, SelectionKey.OP_CONNECT);//& SelectionKey.OP_READ 这里不能两个事件一起注册，会导致接收不到事件
 		logger.info("connected = " + connected);
 		processKeys();
 	}
@@ -72,8 +72,8 @@ public class NioClient {
 			channel.close();
 			throw new IOException("failed to finish connect");
 		}
-		// 这里必须把op_connect时间反注册了，否则会一直出发op_connect事件
-		key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
+		// 这里必须把op_connect时间反注册了，否则会一直出发op_connect事件；同时注册READ事件
+		key.interestOps((key.interestOps() & ~SelectionKey.OP_CONNECT) | SelectionKey.OP_READ);
 		key.attach(ByteBuffer.allocate(10 * 1024));
 		for (ChannelInHandler<?> handler : inHandlers) {
 			handler.channelActive(channel);
@@ -91,7 +91,9 @@ public class NioClient {
 		while (channel.read(byteBuffer) > 0) {
 		}
 		byteBuffer.flip();
-		// channel.read(dst);
+		if(byteBuffer.remaining() == 0){
+			return;
+		}
 		for (ChannelInHandler<?> inHandler : inHandlers) {
 			inHandler.read(byteBuffer, channel);
 		}
@@ -110,8 +112,5 @@ public class NioClient {
 		NioClient nioClient = new NioClient();
 		nioClient.addHandler(new SimpleChannelInHandler());
 		nioClient.init(11688);
-		Thread.sleep(3000);
-		// 如果这里selector不关闭，直接kill进程，服务端会一直收到op_read事件，但是读不到数据，也不报IOException
-		// nioClient.shutdown();
 	}
 }
