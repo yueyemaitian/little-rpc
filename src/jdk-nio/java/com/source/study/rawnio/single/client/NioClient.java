@@ -27,9 +27,7 @@ public class NioClient {
 		SocketChannel sc = SocketChannel.open();
 		sc.configureBlocking(false);
 		boolean connected = sc.connect(new InetSocketAddress(port));
-		if (!connected) {
-			sc.register(selector, SelectionKey.OP_CONNECT);
-		}
+		sc.register(selector, SelectionKey.OP_CONNECT);
 		logger.info("connected = " + connected);
 		processKeys();
 	}

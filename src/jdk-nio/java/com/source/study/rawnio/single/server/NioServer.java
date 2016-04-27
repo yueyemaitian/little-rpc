@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.source.study.rawnio.single.ChannelHandler;
 import com.source.study.rawnio.single.ChannelInHandler;
 
 public class NioServer {
-
+	private static final Logger logger = LogManager.getLogger(NioServer.class);
 	private Selector selector;
 	private List<ChannelInHandler<?>> inHandlers = new ArrayList<ChannelInHandler<?>>();
 
@@ -41,14 +44,34 @@ public class NioServer {
 
 	public void listen() throws IOException {
 		while (selector.select() > 0) {
-			Set<SelectionKey> keys = selector.selectedKeys();
-			Iterator<SelectionKey> iter = keys.iterator();
-			while (iter.hasNext()) {
-				SelectionKey key = iter.next();
-				iter.remove();
-				System.out.println("receive key:" + key.channel() + ", op: " + key.interestOps());
+			processKeys(selector.selectedKeys());
+		}
+	}
+
+	private void processKeys(Set<SelectionKey> keys) throws IOException {
+		Iterator<SelectionKey> iter = keys.iterator();
+		while (iter.hasNext()) {
+			SelectionKey key = iter.next();
+			iter.remove();
+			logger.info("receive key:" + key.channel() + ", op: " + key.interestOps());
+			try {
 				processSelectionKey(key);
+			} catch (IOException e) {//如果抛出IOException 很可能是客户端已经close了或者进程被kill
+				logger.error("Failed to process selection key： " + key, e);
+				closeIfNecessary(key);
 			}
+		}
+	}
+
+	private void closeIfNecessary(SelectionKey key) {
+		SocketChannel channel = (SocketChannel) key.channel();
+		if (!channel.isOpen() || !channel.isConnected()) {
+			return;
+		}
+		try {
+			channel.close();
+		} catch (IOException e) {
+			logger.error("Failed to close channel", e);
 		}
 	}
 
@@ -57,16 +80,14 @@ public class NioServer {
 		if ((ops & SelectionKey.OP_ACCEPT) > 0) {
 			accept(key);
 		}
+		// client close的时候，也会触发op_read事件
 		if ((ops & SelectionKey.OP_READ) > 0) {
 			read(key);
-			((SocketChannel)key.channel()).isOpen();
-			((SocketChannel)key.channel()).isConnected();
-			((SocketChannel)key.channel()).validOps();
 		}
-		//close的时候
-		if((ops & SelectionKey.OP_READ) > 0){
-			if(!key.channel().isOpen()){
-//				key.channel().close();
+
+		if ((ops & SelectionKey.OP_READ) > 0) {
+			if (!key.channel().isOpen()) {
+				// key.channel().close();
 			}
 		}
 
@@ -121,7 +142,7 @@ public class NioServer {
 
 				@Override
 				public void channelActive(SocketChannel channel) {
-					
+
 				}
 			});
 			nioServer.listen();
