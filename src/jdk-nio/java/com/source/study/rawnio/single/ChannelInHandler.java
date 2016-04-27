@@ -7,7 +7,7 @@ import java.nio.channels.SocketChannel;
 /**
  * 接收数据处理器
  * 
- * @author xlemily
+ * @author tianmai.fh
  *
  */
 public interface ChannelInHandler<T> extends ChannelHandler {
