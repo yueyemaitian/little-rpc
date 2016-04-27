@@ -4,11 +4,17 @@ little-rpc Project
 
 
 #Table of Content
-* [Requirements](#源代码目录说明)
-* 源代码目录说明
-* Tag说明
+* [Requirements](#requirements)
+* [源代码目录说明](#source)
+* [Tag说明](#tag)
 
-源代码目录说明
+Requirements
+------------
+* JDK 1.7
+* Maven
+
+
+source 源代码目录说明
 ------------
 src/jdk-nio/java : 用jdk原生nio接口写的socket通信逻辑，旨在了解写一个类似netty的网络通信框架，需要考虑的问题和细节
 src/netty/java   : 用netty实现的一些功能、列子
