@@ -44,6 +44,7 @@ public class NioServer {
 
 	public void listen() throws IOException {
 		while (selector.select() > 0) {
+			//客户端断了的时候，为何服务端会触发两次OP_READ事件
 			processKeys(selector.selectedKeys());
 		}
 	}
