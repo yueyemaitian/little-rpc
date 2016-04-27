@@ -12,4 +12,5 @@ import java.nio.channels.SocketChannel;
  */
 public interface ChannelInHandler<T> extends ChannelHandler {
 	public T read(ByteBuffer byteBuf, SocketChannel channel) throws IOException;
+	public void channelActive(SocketChannel channel) throws IOException;
 }

@@ -23,6 +23,17 @@
 			<artifactId>netty-all</artifactId>
 			<version>4.1.0.CR3</version>
 		</dependency>
+		<!-- Logging frameworks -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -43,6 +54,7 @@
 								<source>src/jdk-nio/java</source>
 								<source>src/netty/java</source>
 								<source>src/rpc/java</source>
+								<source>src/main/resources</source>
 								<source>src/test/java</source>
 							</sources>
 						</configuration>

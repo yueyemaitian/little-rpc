@@ -53,7 +53,7 @@ public class NioServer {
 	}
 
 	public void processSelectionKey(SelectionKey key) throws IOException {
-		int ops = key.interestOps();
+		int ops = key.readyOps();
 		if ((ops & SelectionKey.OP_ACCEPT) > 0) {
 			accept(key);
 		}
@@ -117,6 +117,11 @@ public class NioServer {
 					channel.write(byteBuf);
 					byteBuf.clear();
 					return rst;
+				}
+
+				@Override
+				public void channelActive(SocketChannel channel) {
+					
 				}
 			});
 			nioServer.listen();
