@@ -14,8 +14,8 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.source.study.rawnio.single.ChannelHandler;
-import com.source.study.rawnio.single.ChannelInHandler;
+import com.source.study.rawnio.handler.ChannelHandler;
+import com.source.study.rawnio.handler.ChannelInHandler;
 
 public class NioClient {
 	private Selector selector;
@@ -28,6 +28,7 @@ public class NioClient {
 		sc.configureBlocking(false);
 		boolean connected = sc.connect(new InetSocketAddress(port));
 		sc.register(selector, SelectionKey.OP_CONNECT);//& SelectionKey.OP_READ 这里不能两个事件一起注册，会导致接收不到事件
+//		sc.regi
 		logger.info("connected = " + connected);
 		processKeys();
 	}
@@ -110,7 +111,7 @@ public class NioClient {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		NioClient nioClient = new NioClient();
-		nioClient.addHandler(new SimpleChannelInHandler());
+		nioClient.addHandler(new SimpleClientInHandler());
 		nioClient.init(11688);
 	}
 }

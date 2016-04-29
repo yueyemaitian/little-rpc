@@ -7,11 +7,11 @@ import java.nio.channels.SocketChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.source.study.rawnio.single.ChannelInHandler;
+import com.source.study.rawnio.handler.ChannelInHandler;
 
-public class SimpleChannelInHandler implements ChannelInHandler<String> {
+public class SimpleClientInHandler implements ChannelInHandler<String> {
 
-	private static final Logger logger = LogManager.getLogger(SimpleChannelInHandler.class);
+	private static final Logger logger = LogManager.getLogger(SimpleClientInHandler.class);
 	private ByteBuffer byteBuf = ByteBuffer.allocate(1024);
 	{
 		byteBuf.put("Hello World".getBytes());
@@ -33,6 +33,11 @@ public class SimpleChannelInHandler implements ChannelInHandler<String> {
 	public void channelActive(SocketChannel channel) throws IOException {
 		logger.info("Channel active, will write data to server: " + channel);
 		channel.write(byteBuf);
+	}
+
+	@Override
+	public void close(SocketChannel channel) {
+		
 	}
 
 }

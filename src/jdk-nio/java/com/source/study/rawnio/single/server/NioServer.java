@@ -11,13 +11,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.source.study.rawnio.single.ChannelHandler;
-import com.source.study.rawnio.single.ChannelInHandler;
+import com.source.study.rawnio.handler.ChannelHandler;
+import com.source.study.rawnio.handler.ChannelInHandler;
 
 public class NioServer {
 	private static final Logger logger = LogManager.getLogger(NioServer.class);
@@ -54,8 +53,6 @@ public class NioServer {
 		while (iter.hasNext()) {
 			SelectionKey key = iter.next();
 			iter.remove();
-			// logger.info("receive key:" + key.channel() + ", op: " +
-			// key.interestOps());
 			try {
 				processSelectionKey(key);
 			} catch (IOException e) {// 如果抛出IOException 很可能是客户端已经close了或者进程被kill
@@ -132,29 +129,7 @@ public class NioServer {
 		try {
 			nioServer.init(11688);
 
-			nioServer.addHandler(new ChannelInHandler<String>() {
-				private AtomicLong idx = new AtomicLong();
-				private ByteBuffer byteBufCache = ByteBuffer.allocate(1024);
-
-				@Override
-				public String read(ByteBuffer byteBuf, SocketChannel channel) throws IOException {
-					byte[] dst = new byte[byteBuf.remaining()];
-					byteBuf.get(dst);
-					byteBuf.clear();
-					String rst = new String(dst);
-					logger.info("Receive data from " + channel.getRemoteAddress() + ": " + rst);
-					byteBufCache.clear();
-					byteBufCache.put(("received#" + idx.getAndIncrement()).getBytes());
-					byteBufCache.flip();
-					channel.write(byteBufCache);
-					return rst;
-				}
-
-				@Override
-				public void channelActive(SocketChannel channel) {
-
-				}
-			});
+			nioServer.addHandler(new SimpleServerInHandler());
 			nioServer.listen();
 			Thread.sleep(10000000);
 		} catch (IOException e) {

@@ -1,4 +1,4 @@
-package com.source.study.rawnio.single;
+package com.source.study.rawnio.handler;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -13,4 +13,5 @@ import java.nio.channels.SocketChannel;
 public interface ChannelInHandler<T> extends ChannelHandler {
 	public T read(ByteBuffer byteBuf, SocketChannel channel) throws IOException;
 	public void channelActive(SocketChannel channel) throws IOException;
+	public void close(SocketChannel channel);
 }
