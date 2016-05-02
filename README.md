@@ -29,7 +29,7 @@ tag
 	* [v0.3-jdknio_xxxx](./docs/V0.X/v0.3.md) : `XXXXX通信` 服务端和客户端都支持多连接通信
 	* [v0.4-jdknio_xxxx](./docs/V0.X/v0.4.md) : `XXXXX通信` 服务端和客户端都支持多连接通信
 	
-* `V1.X`是基于Netty写的一些代码
+* `V1.X`是基于Netty写的一些代码，分析Netty的架构和实现
 * `V2.X`是基于Netty写的RPC框架代码
 
 

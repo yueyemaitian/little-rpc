@@ -1,5 +1,8 @@
 package com.rpc.little.netty.ping;
 
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.rpc.little.netty.ping.msg.Byte2MsgHandler;
 import com.rpc.little.netty.ping.msg.Msg2ByteHandler;
 import com.rpc.little.netty.ping.msg.RcvReturnMsgHandler;
@@ -15,8 +18,18 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class Pong {
 	public static void main(String[] args) throws InterruptedException {
-		EventLoopGroup boss = new NioEventLoopGroup(2);
-		EventLoopGroup worker = new NioEventLoopGroup(2);
+		EventLoopGroup boss = new NioEventLoopGroup(2,new ThreadFactory(){
+			private final AtomicInteger idx = new AtomicInteger();
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r,"netty-boss#" + idx.incrementAndGet());
+			}});
+		EventLoopGroup worker = new NioEventLoopGroup(2,new ThreadFactory(){
+			private final AtomicInteger idx = new AtomicInteger();
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r,"netty-worker#" + idx.incrementAndGet());
+			}});
 		try {
 			ServerBootstrap sb = new ServerBootstrap();
 			sb.group(boss, worker).channel(NioServerSocketChannel.class);
